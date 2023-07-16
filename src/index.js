@@ -5,12 +5,30 @@ import { getImg } from './img-api';
 
 const formEl = document.querySelector('.search-form');
 const galleryEl = document.querySelector('.gallery');
+const targetEl = document.querySelector('.guard');
+
+let currentPage = 1;
+let options = {
+    root: null,
+    rootMargin: '300px',
+    threshold: 1.0
+}
+
+var observer = new IntersectionObserver(onLoad, options);
+
+function onLoad(entries, observer) {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        currentPage += 1;
+      }
+    });
+}
 
 formEl.addEventListener('submit', searchImg);
 
 function searchImg(event) {
   event.preventDefault();
-
+  galleryEl.innerHTML='';
   const {
     elements: {searchQuery},
   } = event.currentTarget;
@@ -19,6 +37,9 @@ function searchImg(event) {
 
   getImg(param)
     .then(data => {
+      if (data.length === 0) {
+        throw new Error();
+      }
       const markup = data
         .map(
           ({
@@ -35,16 +56,20 @@ function searchImg(event) {
           <img src="${webformatURL}" alt="${tags}" width="300" loading="lazy" />
           <div class="info">
             <p class="info-item">
-              <b>Likes ${likes}</b>
+              <b>Likes</b>
+              <span>${likes}</span>
             </p>
             <p class="info-item">
-              <b>Views ${views}</b>
+              <b>Views</b>
+              <span>${views}</span>
             </p>
             <p class="info-item">
-              <b>Comments ${comments}</b>
+              <b>Comments</b>
+              <span>${comments}</span>
             </p>
             <p class="info-item">
-              <b>Downloads ${downloads}</b>
+              <b>Downloads</b>
+              <span>${downloads}</span>
             </p>
           </div>
         </a>
@@ -56,5 +81,9 @@ function searchImg(event) {
 
       let lightbox = new SimpleLightbox('.photo-card a');
     })
-    .catch(error => console.log(error));
+    .catch(error =>
+      Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      )
+    );
 }
