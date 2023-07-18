@@ -72,8 +72,15 @@ function searchImg(event) {
         .join('');
 
       galleryEl.insertAdjacentHTML('beforeend', markup);
-      observer.observe(targetEl);
       lightbox.refresh();
+      if (data.totalHits > 40) {
+         observer.observe(targetEl);
+       }
+      if (data.totalHits <= 40) {
+        Notiflix.Notify.info(
+          "We're sorry, but you've reached the end of search results."
+        );
+      }     
     })
     .catch(error =>
       Notiflix.Notify.failure(
